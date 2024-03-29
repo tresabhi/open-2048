@@ -1,2 +1,24 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<script lang="ts">
+  import { onMount } from 'svelte';
+
+  let extraClass = '';
+
+  onMount(() => {
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      extraClass = 'dark';
+    }
+  });
+</script>
+
+<div class={`container ${extraClass}`}></div>
+
+<style>
+  @import '@radix-ui/colors/mauve.css';
+  @import '@radix-ui/colors/mauve-dark.css';
+
+  .container {
+    background-color: var(--mauve-1);
+    height: 100vh;
+    width: 100vw;
+  }
+</style>
