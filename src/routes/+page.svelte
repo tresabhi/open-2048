@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Game from '$lib/game.svelte';
   import { onMount } from 'svelte';
 
   let extraClass = '';
@@ -10,7 +11,9 @@
   });
 </script>
 
-<div class={`container ${extraClass}`}></div>
+<div class={`container ${extraClass}`}>
+  <Game />
+</div>
 
 <style>
   @import '@radix-ui/colors/mauve.css';
@@ -20,5 +23,8 @@
     background-color: var(--mauve-1);
     height: 100vh;
     width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 </style>
