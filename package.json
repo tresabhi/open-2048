@@ -27,6 +27,7 @@
   "type": "module",
   "dependencies": {
     "@radix-ui/colors": "^3.0.0",
+    "immer": "^10.0.4",
     "lodash": "^4.17.21"
   }
 }

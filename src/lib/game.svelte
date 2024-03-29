@@ -1,12 +1,46 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
   import { board } from '../stores/board';
+
+  onMount(() => {
+    if (!get(board).hasBegun) board.insertRandomCell();
+  });
+
+  function onKeyDown({ key, repeat }: KeyboardEvent) {
+    if (repeat) return;
+
+    switch (key) {
+      case 'w':
+      case 'ArrowUp':
+        board.insertRandomCell();
+        break;
+
+      case 'a':
+      case 'ArrowLeft':
+        board.insertRandomCell();
+        break;
+
+      case 's':
+      case 'ArrowDown':
+        board.insertRandomCell();
+        break;
+
+      case 'd':
+      case 'ArrowRight':
+        board.insertRandomCell();
+        break;
+    }
+  }
 </script>
 
 <div class="container">
   {#each Array(16) as _, index}
-    <div class="cell">{$board[index]}</div>
+    <div class="cell">{$board.cells[index]}</div>
   {/each}
 </div>
+
+<svelte:window on:keydown={onKeyDown} />
 
 <style>
   .container {
