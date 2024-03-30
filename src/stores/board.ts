@@ -7,7 +7,6 @@ const { times, forEach, forEachRight } = lodash;
 
 type Cells = Tuple<number, 16>;
 interface Board {
-  hasBegun: boolean;
   cells: Cells;
 }
 
@@ -19,8 +18,7 @@ export enum Direction {
 }
 
 const { subscribe, update } = writable<Board>({
-  hasBegun: false,
-  cells: times(16, (index) => 0) as Cells,
+  cells: times(16, () => 0) as Cells,
 });
 
 export const board = {
@@ -117,5 +115,13 @@ export const board = {
     );
 
     if (mutated) this.insertRandomCell();
+  },
+
+  clear() {
+    update(
+      produce<Board>((draft) => {
+        draft.cells = times(16, () => 0) as Cells;
+      }),
+    );
   },
 };

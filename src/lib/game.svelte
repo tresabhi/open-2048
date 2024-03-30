@@ -1,21 +1,16 @@
 <script lang="ts">
-  import lodash from 'lodash';
   import { onMount } from 'svelte';
   import { get } from 'svelte/store';
   import { Direction, board } from '../stores/board';
 
-  const { times } = lodash;
-
-  const colorMap = times(8, (index) => index + (index > 6 ? 2 : 1));
-
-  console.log(colorMap);
+  const COLOR_MAP = [4, 5, 6, 6, 6, 6, 7, 7, 8, 9];
 
   onMount(() => {
-    if (!get(board).hasBegun) board.insertRandomCell();
+    if (get(board).cells.every((cell) => cell === 0)) board.insertRandomCell();
   });
 
   function onKeyDown({ key, repeat }: KeyboardEvent) {
-    // if (repeat) return;
+    if (repeat) return;
 
     switch (key) {
       case 'w':
@@ -37,6 +32,11 @@
       case 'ArrowRight':
         board.move(Direction.Right);
         break;
+
+      case 'r':
+        board.clear();
+        board.insertRandomCell();
+        break;
     }
   }
 </script>
@@ -45,19 +45,13 @@
   {#each Array(16) as _, index}
     <div
       class="cell"
-      style={`background-color: var(--amber-${
-        colorMap[
-          Math.min(
-            colorMap.length - 1,
-            Math.floor(
-              (colorMap.length / (Math.log2(2048) + 1)) *
-                Math.log2($board.cells[index]),
-            ),
-          )
-        ]
-      })`}
+      style={`background-color: ${
+        $board.cells[index] === 0
+          ? 'none'
+          : `var(--amber-${COLOR_MAP[Math.log2($board.cells[index]) - 1] ?? COLOR_MAP.at(-1)})`
+      }`}
     >
-      {$board.cells[index]}
+      {$board.cells[index] === 0 ? '' : $board.cells[index]}
     </div>
   {/each}
 </div>
