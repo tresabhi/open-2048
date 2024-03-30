@@ -1,7 +1,14 @@
 <script lang="ts">
+  import lodash from 'lodash';
   import { onMount } from 'svelte';
   import { get } from 'svelte/store';
   import { Direction, board } from '../stores/board';
+
+  const { times } = lodash;
+
+  const colorMap = times(8, (index) => index + (index > 6 ? 2 : 1));
+
+  console.log(colorMap);
 
   onMount(() => {
     if (!get(board).hasBegun) board.insertRandomCell();
@@ -18,7 +25,7 @@
 
       case 'a':
       case 'ArrowLeft':
-        board.left();
+        board.move(Direction.Left);
         break;
 
       case 's':
@@ -28,7 +35,7 @@
 
       case 'd':
       case 'ArrowRight':
-        board.right();
+        board.move(Direction.Right);
         break;
     }
   }
@@ -38,7 +45,17 @@
   {#each Array(16) as _, index}
     <div
       class="cell"
-      style={`background-color: var(--amber-${Math.min(9, Math.floor(Math.log2($board.cells[index]) / 2)) + 2})`}
+      style={`background-color: var(--amber-${
+        colorMap[
+          Math.min(
+            colorMap.length - 1,
+            Math.floor(
+              (colorMap.length / (Math.log2(2048) + 1)) *
+                Math.log2($board.cells[index]),
+            ),
+          )
+        ]
+      })`}
     >
       {$board.cells[index]}
     </div>
