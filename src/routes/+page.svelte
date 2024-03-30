@@ -18,6 +18,8 @@
 <style>
   @import '@radix-ui/colors/mauve.css';
   @import '@radix-ui/colors/mauve-dark.css';
+  @import '@radix-ui/colors/amber.css';
+  @import '@radix-ui/colors/amber-dark.css';
 
   .container {
     background-color: var(--mauve-1);

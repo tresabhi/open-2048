@@ -59,32 +59,28 @@ export const board = {
               (searchingCell) => searchingCell === cell,
             );
             if (
-              mergeableY !== y &&
+              mergeableY < y &&
               column.slice(mergeableY + 1, y).every((cell) => cell === 0)
             ) {
-              draft.cells[x + 4 * mergeableY] = cell * 2;
               column[mergeableY] = cell * 2;
-              draft.cells[x + 4 * y] = 0;
               column[y] = 0;
               mutated = true;
-
-              return;
-            }
-
-            const emptyY = column.findIndex(
-              (searchingCell) => searchingCell === 0,
-            );
-            if (
-              emptyY < y &&
-              column.slice(emptyY + 1, y).every((cell) => cell === 0)
-            ) {
-              draft.cells[x + 4 * emptyY] = cell;
-              column[emptyY] = cell;
-              draft.cells[x + 4 * y] = 0;
-              column[y] = 0;
-              mutated = true;
+            } else {
+              const emptyY = column.findIndex(
+                (searchingCell) => searchingCell === 0,
+              );
+              if (
+                emptyY < y &&
+                column.slice(emptyY + 1, y).every((cell) => cell === 0)
+              ) {
+                column[emptyY] = cell;
+                column[y] = 0;
+                mutated = true;
+              }
             }
           });
+
+          column.forEach((cell, y) => (draft.cells[x + 4 * y] = cell));
         });
       }),
     );
@@ -107,32 +103,28 @@ export const board = {
               (searchingCell) => searchingCell === cell,
             );
             if (
-              mergeableY !== y &&
+              mergeableY > y &&
               column.slice(y + 1, mergeableY).every((cell) => cell === 0)
             ) {
-              draft.cells[x + 4 * mergeableY] = cell * 2;
               column[mergeableY] = cell * 2;
-              draft.cells[x + 4 * y] = 0;
               column[y] = 0;
               mutated = true;
-
-              return;
-            }
-
-            const emptyY = column.findLastIndex(
-              (searchingCell) => searchingCell === 0,
-            );
-            if (
-              emptyY > y &&
-              column.slice(y + 1, mergeableY).every((cell) => cell === 0)
-            ) {
-              draft.cells[x + 4 * emptyY] = cell;
-              column[emptyY] = cell;
-              draft.cells[x + 4 * y] = 0;
-              column[y] = 0;
-              mutated = true;
+            } else {
+              const emptyY = column.findLastIndex(
+                (searchingCell) => searchingCell === 0,
+              );
+              if (
+                emptyY > y &&
+                column.slice(y + 1, mergeableY).every((cell) => cell === 0)
+              ) {
+                column[emptyY] = cell;
+                column[y] = 0;
+                mutated = true;
+              }
             }
           });
+
+          column.forEach((cell, y) => (draft.cells[x + 4 * y] = cell));
         });
       }),
     );
@@ -145,10 +137,12 @@ export const board = {
 
     update(
       produce<Board>((draft) => {
+        console.clear();
+
         times(4, (y) => {
-          const row = draft.cells.filter(
-            (_, index) => Math.floor(index / 4) === y,
-          );
+          const row = draft.cells.slice(4 * y, 4 * y + 4);
+
+          console.log(row);
 
           row.forEach((cell, x) => {
             if (cell === 0 || x === 0) return;
@@ -156,33 +150,30 @@ export const board = {
             const mergeableX = row.findIndex(
               (searchingCell) => searchingCell === cell,
             );
+            console.log(`(${x}, ${y})`, mergeableX);
             if (
-              mergeableX !== x &&
+              mergeableX < x &&
               row.slice(mergeableX + 1, x).every((cell) => cell === 0)
             ) {
-              draft.cells[mergeableX + 4 * y] = cell * 2;
               row[mergeableX] = cell * 2;
-              draft.cells[x + 4 * y] = 0;
               row[x] = 0;
               mutated = true;
-
-              return;
-            }
-
-            const emptyX = row.findIndex(
-              (searchingCell) => searchingCell === 0,
-            );
-            if (
-              emptyX < x &&
-              row.slice(mergeableX + 1, x).every((cell) => cell === 0)
-            ) {
-              draft.cells[emptyX + 4 * y] = cell;
-              row[emptyX] = cell;
-              draft.cells[x + 4 * y] = 0;
-              row[x] = 0;
-              mutated = true;
+            } else {
+              const emptyX = row.findIndex(
+                (searchingCell) => searchingCell === 0,
+              );
+              if (
+                emptyX < x &&
+                row.slice(mergeableX + 1, x).every((cell) => cell === 0)
+              ) {
+                row[emptyX] = cell;
+                row[x] = 0;
+                mutated = true;
+              }
             }
           });
+
+          row.forEach((cell, x) => (draft.cells[x + 4 * y] = cell));
         });
       }),
     );
@@ -196,9 +187,7 @@ export const board = {
     update(
       produce<Board>((draft) => {
         times(4, (y) => {
-          const row = draft.cells.filter(
-            (_, index) => Math.floor(index / 4) === y,
-          );
+          const row = draft.cells.slice(4 * y, 4 * y + 4);
 
           forEachRight(row, (cell, x) => {
             if (cell === 0 || x === 3) return;
@@ -207,32 +196,28 @@ export const board = {
               (searchingCell) => searchingCell === cell,
             );
             if (
-              mergeableX !== x &&
+              mergeableX > x &&
               row.slice(x + 1, mergeableX).every((cell) => cell === 0)
             ) {
-              draft.cells[mergeableX + 4 * y] = cell * 2;
               row[mergeableX] = cell * 2;
-              draft.cells[x + 4 * y] = 0;
               row[x] = 0;
               mutated = true;
-
-              return;
-            }
-
-            const emptyX = row.findLastIndex(
-              (searchingCell) => searchingCell === 0,
-            );
-            if (
-              emptyX > x &&
-              row.slice(x + 1, mergeableX).every((cell) => cell === 0)
-            ) {
-              draft.cells[emptyX + 4 * y] = cell;
-              row[emptyX] = cell;
-              draft.cells[x + 4 * y] = 0;
-              row[x] = 0;
-              mutated = true;
+            } else {
+              const emptyX = row.findLastIndex(
+                (searchingCell) => searchingCell === 0,
+              );
+              if (
+                emptyX > x &&
+                row.slice(x + 1, mergeableX).every((cell) => cell === 0)
+              ) {
+                row[emptyX] = cell;
+                row[x] = 0;
+                mutated = true;
+              }
             }
           });
+
+          row.forEach((cell, x) => (draft.cells[x + 4 * y] = cell));
         });
       }),
     );

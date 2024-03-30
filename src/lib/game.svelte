@@ -38,7 +38,7 @@
   {#each Array(16) as _, index}
     <div
       class="cell"
-      style={`background-color: var(--mauve-${Math.log2($board.cells[index]) + 2})`}
+      style={`background-color: var(--amber-${Math.min(9, Math.floor(Math.log2($board.cells[index]) / 2)) + 2})`}
     >
       {$board.cells[index]}
     </div>
