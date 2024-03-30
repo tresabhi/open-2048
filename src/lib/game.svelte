@@ -8,27 +8,27 @@
   });
 
   function onKeyDown({ key, repeat }: KeyboardEvent) {
-    if (repeat) return;
+    // if (repeat) return;
 
     switch (key) {
       case 'w':
       case 'ArrowUp':
-        board.insertRandomCell();
+        board.up();
         break;
 
       case 'a':
       case 'ArrowLeft':
-        board.insertRandomCell();
+        board.left();
         break;
 
       case 's':
       case 'ArrowDown':
-        board.insertRandomCell();
+        board.down();
         break;
 
       case 'd':
       case 'ArrowRight':
-        board.insertRandomCell();
+        board.right();
         break;
     }
   }
@@ -36,7 +36,12 @@
 
 <div class="container">
   {#each Array(16) as _, index}
-    <div class="cell">{$board.cells[index]}</div>
+    <div
+      class="cell"
+      style={`background-color: var(--mauve-${Math.log2($board.cells[index]) + 2})`}
+    >
+      {$board.cells[index]}
+    </div>
   {/each}
 </div>
 

@@ -3,7 +3,7 @@ import lodash from 'lodash';
 import { writable } from 'svelte/store';
 import type { Tuple } from '../types/tuple';
 
-const { times } = lodash;
+const { times, forEachRight } = lodash;
 
 type Cells = Tuple<number, 16>;
 interface Board {
@@ -23,10 +23,10 @@ export const board = {
     let hasInserted = true;
 
     update(
-      produce<Board>((board) => {
+      produce<Board>((draft) => {
         const availableCells: number[] = [];
 
-        board.cells.forEach((cell, index) => {
+        draft.cells.forEach((cell, index) => {
           if (cell === 0) availableCells.push(index);
         });
 
@@ -37,10 +37,206 @@ export const board = {
 
         const randomCell =
           availableCells[Math.floor(Math.random() * availableCells.length)];
-        board.cells[randomCell] = Math.random() < 0.9 ? 2 : 4;
+        draft.cells[randomCell] = Math.random() < 0.9 ? 2 : 4;
       }),
     );
 
     return hasInserted;
+  },
+
+  up() {
+    let mutated = false;
+
+    update(
+      produce<Board>((draft) => {
+        times(4, (x) => {
+          const column = draft.cells.filter((_, index) => index % 4 === x);
+
+          column.forEach((cell, y) => {
+            if (cell === 0 || y === 0) return;
+
+            const mergeableY = column.findIndex(
+              (searchingCell) => searchingCell === cell,
+            );
+            if (
+              mergeableY !== y &&
+              column.slice(mergeableY + 1, y).every((cell) => cell === 0)
+            ) {
+              draft.cells[x + 4 * mergeableY] = cell * 2;
+              column[mergeableY] = cell * 2;
+              draft.cells[x + 4 * y] = 0;
+              column[y] = 0;
+              mutated = true;
+
+              return;
+            }
+
+            const emptyY = column.findIndex(
+              (searchingCell) => searchingCell === 0,
+            );
+            if (
+              emptyY < y &&
+              column.slice(emptyY + 1, y).every((cell) => cell === 0)
+            ) {
+              draft.cells[x + 4 * emptyY] = cell;
+              column[emptyY] = cell;
+              draft.cells[x + 4 * y] = 0;
+              column[y] = 0;
+              mutated = true;
+            }
+          });
+        });
+      }),
+    );
+
+    if (mutated) this.insertRandomCell();
+  },
+
+  down() {
+    let mutated = false;
+
+    update(
+      produce<Board>((draft) => {
+        times(4, (x) => {
+          const column = draft.cells.filter((_, index) => index % 4 === x);
+
+          forEachRight(column, (cell, y) => {
+            if (cell === 0 || y === 3) return;
+
+            const mergeableY = column.findLastIndex(
+              (searchingCell) => searchingCell === cell,
+            );
+            if (
+              mergeableY !== y &&
+              column.slice(y + 1, mergeableY).every((cell) => cell === 0)
+            ) {
+              draft.cells[x + 4 * mergeableY] = cell * 2;
+              column[mergeableY] = cell * 2;
+              draft.cells[x + 4 * y] = 0;
+              column[y] = 0;
+              mutated = true;
+
+              return;
+            }
+
+            const emptyY = column.findLastIndex(
+              (searchingCell) => searchingCell === 0,
+            );
+            if (
+              emptyY > y &&
+              column.slice(y + 1, mergeableY).every((cell) => cell === 0)
+            ) {
+              draft.cells[x + 4 * emptyY] = cell;
+              column[emptyY] = cell;
+              draft.cells[x + 4 * y] = 0;
+              column[y] = 0;
+              mutated = true;
+            }
+          });
+        });
+      }),
+    );
+
+    if (mutated) this.insertRandomCell();
+  },
+
+  left() {
+    let mutated = false;
+
+    update(
+      produce<Board>((draft) => {
+        times(4, (y) => {
+          const row = draft.cells.filter(
+            (_, index) => Math.floor(index / 4) === y,
+          );
+
+          row.forEach((cell, x) => {
+            if (cell === 0 || x === 0) return;
+
+            const mergeableX = row.findIndex(
+              (searchingCell) => searchingCell === cell,
+            );
+            if (
+              mergeableX !== x &&
+              row.slice(mergeableX + 1, x).every((cell) => cell === 0)
+            ) {
+              draft.cells[mergeableX + 4 * y] = cell * 2;
+              row[mergeableX] = cell * 2;
+              draft.cells[x + 4 * y] = 0;
+              row[x] = 0;
+              mutated = true;
+
+              return;
+            }
+
+            const emptyX = row.findIndex(
+              (searchingCell) => searchingCell === 0,
+            );
+            if (
+              emptyX < x &&
+              row.slice(mergeableX + 1, x).every((cell) => cell === 0)
+            ) {
+              draft.cells[emptyX + 4 * y] = cell;
+              row[emptyX] = cell;
+              draft.cells[x + 4 * y] = 0;
+              row[x] = 0;
+              mutated = true;
+            }
+          });
+        });
+      }),
+    );
+
+    if (mutated) this.insertRandomCell();
+  },
+
+  right() {
+    let mutated = false;
+
+    update(
+      produce<Board>((draft) => {
+        times(4, (y) => {
+          const row = draft.cells.filter(
+            (_, index) => Math.floor(index / 4) === y,
+          );
+
+          forEachRight(row, (cell, x) => {
+            if (cell === 0 || x === 3) return;
+
+            const mergeableX = row.findLastIndex(
+              (searchingCell) => searchingCell === cell,
+            );
+            if (
+              mergeableX !== x &&
+              row.slice(x + 1, mergeableX).every((cell) => cell === 0)
+            ) {
+              draft.cells[mergeableX + 4 * y] = cell * 2;
+              row[mergeableX] = cell * 2;
+              draft.cells[x + 4 * y] = 0;
+              row[x] = 0;
+              mutated = true;
+
+              return;
+            }
+
+            const emptyX = row.findLastIndex(
+              (searchingCell) => searchingCell === 0,
+            );
+            if (
+              emptyX > x &&
+              row.slice(x + 1, mergeableX).every((cell) => cell === 0)
+            ) {
+              draft.cells[emptyX + 4 * y] = cell;
+              row[emptyX] = cell;
+              draft.cells[x + 4 * y] = 0;
+              row[x] = 0;
+              mutated = true;
+            }
+          });
+        });
+      }),
+    );
+
+    if (mutated) this.insertRandomCell();
   },
 };
