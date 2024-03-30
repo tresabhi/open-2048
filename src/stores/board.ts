@@ -3,12 +3,19 @@ import lodash from 'lodash';
 import { writable } from 'svelte/store';
 import type { Tuple } from '../types/tuple';
 
-const { times, forEachRight } = lodash;
+const { times, forEach, forEachRight } = lodash;
 
 type Cells = Tuple<number, 16>;
 interface Board {
   hasBegun: boolean;
   cells: Cells;
+}
+
+export enum Direction {
+  Up,
+  Down,
+  Left,
+  Right,
 }
 
 const { subscribe, update } = writable<Board>({
@@ -44,87 +51,49 @@ export const board = {
     return hasInserted;
   },
 
-  up() {
+  move(direction: Direction) {
     let mutated = false;
 
     update(
       produce<Board>((draft) => {
         times(4, (x) => {
-          const column = draft.cells.filter((_, index) => index % 4 === x);
+          const even = direction % 2 === 0;
+          const vertical = direction <= 2;
+          const slice = draft.cells.filter((_, index) => index % 4 === x);
 
-          column.forEach((cell, y) => {
-            if (cell === 0 || y === 0) return;
+          (even ? forEach : forEachRight)(slice, (cell, y) => {
+            if (cell === 0 || y === (even ? 0 : 3)) return;
 
-            const mergeableY = column.findIndex(
+            const mergeableY = slice[even ? 'findIndex' : 'findLastIndex'](
               (searchingCell) => searchingCell === cell,
             );
             if (
-              mergeableY < y &&
-              column.slice(mergeableY + 1, y).every((cell) => cell === 0)
+              (even ? mergeableY < y : mergeableY > y) &&
+              slice
+                .slice((even ? mergeableY : y) + 1, even ? y : mergeableY)
+                .every((cell) => cell === 0)
             ) {
-              column[mergeableY] = cell * 2;
-              column[y] = 0;
+              slice[mergeableY] = cell * 2;
+              slice[y] = 0;
               mutated = true;
             } else {
-              const emptyY = column.findIndex(
+              const emptyY = slice[even ? 'findIndex' : 'findLastIndex'](
                 (searchingCell) => searchingCell === 0,
               );
               if (
-                emptyY < y &&
-                column.slice(emptyY + 1, y).every((cell) => cell === 0)
+                (even ? emptyY < y : emptyY > y) &&
+                slice
+                  .slice((even ? emptyY : y) + 1, even ? y : emptyY)
+                  .every((cell) => cell === 0)
               ) {
-                column[emptyY] = cell;
-                column[y] = 0;
+                slice[emptyY] = cell;
+                slice[y] = 0;
                 mutated = true;
               }
             }
           });
 
-          column.forEach((cell, y) => (draft.cells[x + 4 * y] = cell));
-        });
-      }),
-    );
-
-    if (mutated) this.insertRandomCell();
-  },
-
-  down() {
-    let mutated = false;
-
-    update(
-      produce<Board>((draft) => {
-        times(4, (x) => {
-          const column = draft.cells.filter((_, index) => index % 4 === x);
-
-          forEachRight(column, (cell, y) => {
-            if (cell === 0 || y === 3) return;
-
-            const mergeableY = column.findLastIndex(
-              (searchingCell) => searchingCell === cell,
-            );
-            if (
-              mergeableY > y &&
-              column.slice(y + 1, mergeableY).every((cell) => cell === 0)
-            ) {
-              column[mergeableY] = cell * 2;
-              column[y] = 0;
-              mutated = true;
-            } else {
-              const emptyY = column.findLastIndex(
-                (searchingCell) => searchingCell === 0,
-              );
-              if (
-                emptyY > y &&
-                column.slice(y + 1, mergeableY).every((cell) => cell === 0)
-              ) {
-                column[emptyY] = cell;
-                column[y] = 0;
-                mutated = true;
-              }
-            }
-          });
-
-          column.forEach((cell, y) => (draft.cells[x + 4 * y] = cell));
+          slice.forEach((cell, y) => (draft.cells[x + 4 * y] = cell));
         });
       }),
     );

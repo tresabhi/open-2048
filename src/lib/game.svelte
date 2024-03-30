@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { get } from 'svelte/store';
-  import { board } from '../stores/board';
+  import { Direction, board } from '../stores/board';
 
   onMount(() => {
     if (!get(board).hasBegun) board.insertRandomCell();
@@ -13,7 +13,7 @@
     switch (key) {
       case 'w':
       case 'ArrowUp':
-        board.up();
+        board.move(Direction.Up);
         break;
 
       case 'a':
@@ -23,7 +23,7 @@
 
       case 's':
       case 'ArrowDown':
-        board.down();
+        board.move(Direction.Down);
         break;
 
       case 'd':
